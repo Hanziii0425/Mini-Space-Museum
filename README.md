@@ -46,6 +46,12 @@ MiniSpaceMuseum/
 
 Add the original source link, creator name, and licence of the astronaut GLB model here.
 
+## AR Marker
+
+The project uses the Hiro marker.
+
+![Hiro Marker](hiro.png)
+
 ## Author
 
 Developed as an academic project.
