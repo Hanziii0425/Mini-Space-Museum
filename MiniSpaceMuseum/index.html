@@ -1,0 +1,721 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Mini Space Museum</title>
+
+    <!-- A-FRAME -->
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+
+    <!-- AR.JS -->
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+
+    <!-- CUSTOM COMPONENTS -->
+    <script>
+
+        // 1. MARKER STATUS
+        AFRAME.registerComponent('marker-status', {
+            init: function () {
+                const banner = document.querySelector('#status');
+
+                this.el.addEventListener('markerFound', function () {
+                    banner.textContent =
+                        'MARKER FOUND - Welcome to Mini Space Museum!';
+                    banner.style.background = '#167D50';
+                });
+
+                this.el.addEventListener('markerLost', function () {
+                    banner.textContent =
+                        'MARKER LOST - Point your camera at the Hiro marker';
+                    banner.style.background = '#B32635';
+                });
+            }
+        });
+
+
+        // 2. PLANET COLOUR CHANGER
+        AFRAME.registerComponent('color-changer', {
+            init: function () {
+                const colors = [
+                    '#2471A3',
+                    '#E74C3C',
+                    '#2ECC71',
+                    '#F1C40F',
+                    '#9B59B6',
+                    '#16A085'
+                ];
+
+                let index = 0;
+
+                this.el.addEventListener('click', () => {
+                    index = (index + 1) % colors.length;
+                    this.el.setAttribute('color', colors[index]);
+                });
+            }
+        });
+
+
+        // 3. STAR GROW AND SHRINK
+        AFRAME.registerComponent('grow-on-tap', {
+            init: function () {
+                let isGrown = false;
+
+                this.el.addEventListener('click', () => {
+                    isGrown = !isGrown;
+
+                    this.el.setAttribute(
+                        'animation__scale',
+                        isGrown
+                            ? 'property: scale; to: 1.8 1.8 1.8; dur: 300; easing: easeOutQuad'
+                            : 'property: scale; to: 1 1 1; dur: 300; easing: easeOutQuad'
+                    );
+                });
+            }
+        });
+
+    </script>
+
+
+    <!-- CSS -->
+    <style>
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+
+        #status {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 13px;
+            text-align: center;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            background: #B32635;
+            z-index: 999;
+            box-sizing: border-box;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+    <!-- STATUS BANNER -->
+    <div id="status">
+        Looking for Hiro marker...
+    </div>
+
+
+    <!-- MAIN AR SCENE -->
+    <a-scene
+        embedded
+        vr-mode-ui="enabled: false"
+        renderer="colorManagement: true"
+        arjs="sourceType: webcam; debugUIEnabled: false;">
+
+
+        <!-- LIGHTING -->
+        <a-entity
+            light="type: ambient; color: #FFFFFF; intensity: 1.2">
+        </a-entity>
+
+        <a-entity
+            light="type: directional; color: #FFFFFF; intensity: 1.5"
+            position="-2 4 3">
+        </a-entity>
+
+
+        <!-- LOAD ASTRONAUT MODEL -->
+        <a-assets>
+            <a-asset-item
+                id="astronaut"
+                src="./models/astronaut.glb">
+            </a-asset-item>
+        </a-assets>
+
+
+        <!-- HIRO MARKER -->
+        <a-marker preset="hiro" marker-status>
+
+
+            <!-- ================================= -->
+            <!-- 1. FUTURISTIC MUSEUM PLATFORM -->
+            <!-- ================================= -->
+
+            <a-box
+                position="0 0.03 0"
+                width="1.35"
+                height="0.06"
+                depth="1.35"
+                color="#17243B"
+                material="metalness: 0.7; roughness: 0.3">
+            </a-box>
+
+            <!-- Glowing-style platform border -->
+            <a-torus
+                position="0 0.075 0"
+                radius="0.62"
+                radius-tubular="0.012"
+                rotation="90 0 0"
+                color="#00D9FF"
+                material="emissive: #007C99; emissiveIntensity: 0.7">
+            </a-torus>
+
+
+            <!-- ================================= -->
+            <!-- 2. CENTRAL SUN -->
+            <!-- ================================= -->
+
+            <a-sphere
+                position="0 0.28 0"
+                radius="0.10"
+                color="#FFB52E"
+                material="emissive: #FF8C00; emissiveIntensity: 0.6"
+                animation="
+                    property: rotation;
+                    to: 0 360 0;
+                    dur: 8000;
+                    loop: true">
+            </a-sphere>
+
+
+            <!-- ================================= -->
+            <!-- 3. MERCURY -->
+            <!-- ================================= -->
+
+            <a-sphere
+                position="-0.20 0.18 0.12"
+                radius="0.045"
+                color="#A5A5A5"
+                material="roughness: 0.9">
+            </a-sphere>
+
+
+            <!-- ================================= -->
+            <!-- 4. VENUS -->
+            <!-- ================================= -->
+
+            <a-sphere
+                position="-0.39 0.22 0.12"
+                radius="0.065"
+                color="#DDA15E"
+                material="roughness: 0.8">
+            </a-sphere>
+
+
+            <!-- ================================= -->
+            <!-- 5. EARTH - INTERACTIVE PLANET -->
+            <!-- ================================= -->
+
+            <a-entity position="-0.32 0.39 -0.12">
+
+                <a-sphere
+                    class="clickable"
+                    color-changer
+                    radius="0.14"
+                    color="#2471A3"
+                    material="metalness: 0.2; roughness: 0.55"
+                    animation="
+                        property: rotation;
+                        to: 0 360 0;
+                        loop: true;
+                        dur: 7000">
+                </a-sphere>
+
+                <!-- Earth atmosphere-style ring -->
+                <a-torus
+                    radius="0.17"
+                    radius-tubular="0.006"
+                    rotation="90 0 0"
+                    color="#77DDFF">
+                </a-torus>
+
+                <!-- Earth continent details -->
+                <a-sphere
+                    position="0.025 0.025 0.12"
+                    radius="0.045"
+                    scale="1 0.7 0.25"
+                    color="#38A169">
+                </a-sphere>
+
+            </a-entity>
+
+
+            <!-- ================================= -->
+            <!-- 6. MARS -->
+            <!-- ================================= -->
+
+            <a-sphere
+                position="0.06 0.20 -0.42"
+                radius="0.075"
+                color="#C1440E"
+                material="roughness: 0.9">
+            </a-sphere>
+
+
+            <!-- Mars surface crater -->
+            <a-sphere
+                position="0.08 0.225 -0.35"
+                radius="0.018"
+                color="#81351F">
+            </a-sphere>
+
+
+            <!-- ================================= -->
+            <!-- 7. JUPITER -->
+            <!-- ================================= -->
+
+            <a-entity position="0.39 0.38 -0.22">
+
+                <a-sphere
+                    radius="0.13"
+                    color="#C49A6C"
+                    material="roughness: 0.8">
+                </a-sphere>
+
+                <!-- Jupiter bands -->
+                <a-torus
+                    radius="0.132"
+                    radius-tubular="0.008"
+                    rotation="90 0 0"
+                    color="#8D6545">
+                </a-torus>
+
+                <!-- Great Red Spot -->
+                <a-sphere
+                    position="0.07 0.015 0.105"
+                    radius="0.025"
+                    scale="1.4 0.8 0.3"
+                    color="#B94B32">
+                </a-sphere>
+
+            </a-entity>
+
+
+            <!-- ================================= -->
+            <!-- 8. SATURN AND ITS RINGS -->
+            <!-- ================================= -->
+
+            <a-entity position="0.40 0.25 0.34">
+
+                <a-sphere
+                    radius="0.095"
+                    color="#E5C07B"
+                    material="roughness: 0.7">
+                </a-sphere>
+
+                <!-- Outer ring -->
+                <a-torus
+                    radius="0.18"
+                    radius-tubular="0.012"
+                    rotation="70 0 0"
+                    color="#D9B77E">
+                </a-torus>
+
+                <!-- Inner ring -->
+                <a-torus
+                    radius="0.14"
+                    radius-tubular="0.009"
+                    rotation="70 0 0"
+                    color="#F2D6A0">
+                </a-torus>
+
+            </a-entity>
+
+
+            <!-- ================================= -->
+            <!-- 9. YELLOW MOON WITH CRATERS -->
+            <!-- ================================= -->
+
+            <a-entity
+                position="0.28 0.30 0.05"
+                animation="
+                    property: position;
+                    to: 0.28 0.46 0.05;
+                    dir: alternate;
+                    loop: true;
+                    dur: 2200">
+
+                <a-sphere
+                    radius="0.105"
+                    color="#D6B85A"
+                    material="roughness: 0.9">
+                </a-sphere>
+
+                <a-sphere
+                    position="0.025 0.025 0.09"
+                    radius="0.022"
+                    color="#9C813F">
+                </a-sphere>
+
+                <a-sphere
+                    position="-0.045 0.045 0.085"
+                    radius="0.016"
+                    color="#9C813F">
+                </a-sphere>
+
+                <a-sphere
+                    position="0 -0.045 0.09"
+                    radius="0.014"
+                    color="#9C813F">
+                </a-sphere>
+
+            </a-entity>
+
+
+            <!-- ================================= -->
+            <!-- 10. ASTEROID BELT -->
+            <!-- ================================= -->
+
+            <a-entity position="0 0.20 0">
+
+                <a-sphere
+                    position="-0.15 0 -0.28"
+                    radius="0.025"
+                    color="#777777">
+                </a-sphere>
+
+                <a-sphere
+                    position="-0.05 0.02 -0.30"
+                    radius="0.018"
+                    color="#999999">
+                </a-sphere>
+
+                <a-sphere
+                    position="0.08 -0.01 -0.28"
+                    radius="0.03"
+                    color="#666666">
+                </a-sphere>
+
+                <a-sphere
+                    position="0.18 0.02 -0.24"
+                    radius="0.02"
+                    color="#888888">
+                </a-sphere>
+
+                <a-sphere
+                    position="0.25 -0.02 -0.20"
+                    radius="0.015"
+                    color="#777777">
+                </a-sphere>
+
+                <a-sphere
+                    position="-0.25 0.01 -0.20"
+                    radius="0.02"
+                    color="#999999">
+                </a-sphere>
+
+                <a-sphere
+                    position="0.14 0.03 -0.35"
+                    radius="0.018"
+                    color="#777777">
+                </a-sphere>
+
+            </a-entity>
+
+
+            <!-- ================================= -->
+            <!-- 11. SPACE SATELLITE -->
+            <!-- ================================= -->
+
+            <a-entity
+                position="-0.42 0.48 -0.35"
+                animation="
+                    property: rotation;
+                    to: 0 360 0;
+                    loop: true;
+                    dur: 10000">
+
+                <!-- Satellite body -->
+                <a-box
+                    width="0.12"
+                    height="0.12"
+                    depth="0.12"
+                    color="#C0C0C0"
+                    material="metalness: 0.8; roughness: 0.25">
+                </a-box>
+
+                <!-- Left solar panel -->
+                <a-box
+                    position="-0.17 0 0"
+                    width="0.18"
+                    height="0.015"
+                    depth="0.12"
+                    color="#1769AA">
+                </a-box>
+
+                <!-- Right solar panel -->
+                <a-box
+                    position="0.17 0 0"
+                    width="0.18"
+                    height="0.015"
+                    depth="0.12"
+                    color="#1769AA">
+                </a-box>
+
+                <!-- Antenna -->
+                <a-cylinder
+                    position="0 0.11 0"
+                    radius="0.008"
+                    height="0.12"
+                    color="#FFFFFF">
+                </a-cylinder>
+
+            </a-entity>
+
+
+            <!-- ================================= -->
+            <!-- 12. ROCKET -->
+            <!-- ================================= -->
+
+            <a-entity position="0 0.40 -0.34">
+
+                <!-- Main rocket body -->
+                <a-cylinder
+                    position="0 0 0"
+                    radius="0.065"
+                    height="0.36"
+                    color="#DCE6F1"
+                    material="metalness: 0.65; roughness: 0.3">
+                </a-cylinder>
+
+                <!-- Rocket nose -->
+                <a-cone
+                    position="0 0.235 0"
+                    radius-bottom="0.065"
+                    radius-top="0"
+                    height="0.13"
+                    color="#E74C3C">
+                </a-cone>
+
+                <!-- Rocket window -->
+                <a-sphere
+                    position="0 0.06 0.063"
+                    radius="0.027"
+                    scale="1 1 0.3"
+                    color="#00BFFF"
+                    material="metalness: 0.8; roughness: 0.15">
+                </a-sphere>
+
+                <!-- Left fin -->
+                <a-box
+                    position="-0.075 -0.12 0"
+                    width="0.08"
+                    height="0.12"
+                    depth="0.03"
+                    rotation="0 0 20"
+                    color="#E74C3C">
+                </a-box>
+
+                <!-- Right fin -->
+                <a-box
+                    position="0.075 -0.12 0"
+                    width="0.08"
+                    height="0.12"
+                    depth="0.03"
+                    rotation="0 0 -20"
+                    color="#E74C3C">
+                </a-box>
+
+                <!-- Engine flame -->
+                <a-cone
+                    position="0 -0.25 0"
+                    radius-bottom="0.04"
+                    radius-top="0"
+                    height="0.14"
+                    color="#FF9F1C"
+                    animation="
+                        property: scale;
+                        to: 1 1.3 1;
+                        dir: alternate;
+                        loop: true;
+                        dur: 400">
+                </a-cone>
+
+            </a-entity>
+
+
+            <!-- ================================= -->
+            <!-- 13. MOVING COMET -->
+            <!-- ================================= -->
+
+            <a-entity
+                position="-0.35 0.70 0.30"
+                animation="
+                    property: position;
+                    to: 0.35 0.70 0.30;
+                    dur: 4000;
+                    dir: alternate;
+                    loop: true">
+
+                <!-- Comet head -->
+                <a-sphere
+                    radius="0.035"
+                    color="#FFFFFF"
+                    material="emissive: #8CEBFF; emissiveIntensity: 1">
+                </a-sphere>
+
+                <!-- Comet tail -->
+                <a-cone
+                    position="0 0 -0.12"
+                    rotation="90 0 0"
+                    radius-bottom="0.025"
+                    radius-top="0"
+                    height="0.20"
+                    color="#36CFFF"
+                    material="transparent: true; opacity: 0.7">
+                </a-cone>
+
+            </a-entity>
+
+
+            <!-- ================================= -->
+            <!-- 14. INTERACTIVE WHITE STAR -->
+            <!-- ================================= -->
+
+            <a-octahedron
+                class="clickable"
+                grow-on-tap
+                position="0 0.20 0.43"
+                radius="0.075"
+                color="#FFFFFF"
+                material="emissive: #FFFFFF; emissiveIntensity: 0.6">
+            </a-octahedron>
+
+
+            <!-- ================================= -->
+            <!-- 15. DECORATIVE STARS -->
+            <!-- ================================= -->
+
+            <a-sphere
+                position="-0.48 0.22 -0.30"
+                radius="0.02"
+                color="#FFFFFF">
+            </a-sphere>
+
+            <a-sphere
+                position="0.48 0.25 0.25"
+                radius="0.025"
+                color="#FFFFFF">
+            </a-sphere>
+
+            <a-sphere
+                position="0.43 0.65 -0.25"
+                radius="0.018"
+                color="#00D9FF">
+            </a-sphere>
+
+            <a-sphere
+                position="-0.35 0.65 0.35"
+                radius="0.018"
+                color="#FFFFFF">
+            </a-sphere>
+
+
+            <!-- ================================= -->
+            <!-- 16. EDUCATIONAL LABELS -->
+            <!-- ================================= -->
+
+            <a-text
+                value="MERCURY"
+                position="-0.20 0.27 0.20"
+                align="center"
+                color="#FFFFFF"
+                scale="0.20 0.20 0.20">
+            </a-text>
+
+            <a-text
+                value="EARTH"
+                position="-0.32 0.59 -0.12"
+                align="center"
+                color="#FFFFFF"
+                scale="0.24 0.24 0.24">
+            </a-text>
+
+            <a-text
+                value="MARS"
+                position="0.06 0.31 -0.42"
+                align="center"
+                color="#FFB199"
+                scale="0.22 0.22 0.22">
+            </a-text>
+
+            <a-text
+                value="JUPITER"
+                position="0.39 0.54 -0.22"
+                align="center"
+                color="#FFE0A0"
+                scale="0.22 0.22 0.22">
+            </a-text>
+
+            <a-text
+                value="SATURN"
+                position="0.40 0.42 0.34"
+                align="center"
+                color="#FFE0A0"
+                scale="0.22 0.22 0.22">
+            </a-text>
+
+
+            <!-- ================================= -->
+            <!-- 17. MUSEUM TITLE -->
+            <!-- ================================= -->
+
+            <a-text
+                value="MINI SPACE MUSEUM"
+                position="0 0.95 0.48"
+                align="center"
+                color="#FFFFFF"
+                scale="0.55 0.55 0.55">
+            </a-text>
+
+            <a-text
+                value="EXPLORE THE UNIVERSE"
+                position="0 0.87 0.48"
+                align="center"
+                color="#00D9FF"
+                scale="0.30 0.30 0.30">
+            </a-text>
+
+
+            <!-- ================================= -->
+            <!-- 18. ASTRONAUT MODEL -->
+            <!-- ================================= -->
+
+            <!-- This will appear when astronaut.glb loads correctly -->
+
+            <a-entity
+                gltf-model="#astronaut"
+                position="0.35 0.10 -0.05"
+                scale="0.5 0.5 0.5"
+                rotation="0 180 0">
+            </a-entity>
+
+
+        </a-marker>
+
+
+        <!-- CAMERA AND INTERACTION -->
+        <a-entity
+            camera
+            cursor="rayOrigin: mouse; fuse: false"
+            raycaster="objects: .clickable; far: 10">
+        </a-entity>
+
+
+    </a-scene>
+
+</body>
+</html>
